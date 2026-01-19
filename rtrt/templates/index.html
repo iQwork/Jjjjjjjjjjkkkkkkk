@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الطلبات الرسمية</title>
+    <style>
+        /* =================== CSS مدمج =================== */
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #1e1e1e;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #111;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        button {
+            margin-top: 20px;
+            padding: 15px 25px;
+            background-color: #ffd700;
+            color: #111;
+            border: none;
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #e6c200;
+        }
+        .output {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+        a.download-link {
+            color: #ffd700;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>منصة الطلبات الرسمية لمجلس النواب</header>
+    <main>
+        <form id="requestForm">
+            <label for="target_agency">اسم الجهة المخاطبة:</label>
+            <input type="text" id="target_agency" name="target_agency" required>
+
+            <label for="subject">عنوان الطلب:</label>
+            <input type="text" id="subject" name="subject" required>
+
+            <label for="details">تفاصيل الطلب:</label>
+            <textarea id="details" name="details" required></textarea>
+
+            <label for="user_name">اسم المواطن:</label>
+            <input type="text" id="user_name" name="user_name" required>
+
+            <label for="phone">رقم الهاتف:</label>
+            <input type="text" id="phone" name="phone" required>
+
+            <button type="submit">إرسال الطلب</button>
+        </form>
+
+        <div class="output" id="output" style="display:none;"></div>
+    </main>
+
+    <script>
+        // =================== JavaScript مدمج ===================
+        const form = document.getElementById('requestForm');
+        const output = document.getElementById('output');
+
+        form.addEventListener('submit', async function(e){
+            e.preventDefault();
+
+            output.style.display = 'block';
+            output.innerHTML = 'جاري معالجة الطلب...';
+
+            const data = {
+                target_agency: document.getElementById('target_agency').value,
+                subject: document.getElementById('subject').value,
+                details: document.getElementById('details').value,
+                user_name: document.getElementById('user_name').value,
+                phone: document.getElementById('phone').value
+            };
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                output.innerHTML = `
+                    <h3>تم إنشاء الكتاب الرسمي!</h3>
+                    <p>النص القانوني:</p>
+                    <pre style="white-space: pre-wrap;">${result.text}</pre>
+                    <p>تحميل الملف: <a class="download-link" href="/download/${result.file}" target="_blank">${result.file}</a></p>
+                `;
+            } catch (error) {
+                output.innerHTML = 'حدث خطأ أثناء معالجة الطلب. حاول مرة أخرى.';
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
